@@ -6864,7 +6864,9 @@ _charPortraits = _charPortraits || {
     "莉迪亚":"https://free-img.400040.xyz/4/2026/05/29/6a19438ce344b.png",
     "艾米莉":"https://free-img.400040.xyz/4/2026/05/29/6a194399a4a98.png",
     "巴蒂斯特":"https://free-img.400040.xyz/4/2026/05/29/6a19437aba7dc.png",
-    "朱尔斯":"https://free-img.400040.xyz/4/2026/05/29/6a19438dc9a4d.png"
+    "朱尔斯":"https://free-img.400040.xyz/4/2026/05/29/6a19438dc9a4d.png",
+    "林青":"https://i.postimg.cc/QMvDP1N5/Linqing.png",
+    "约修亚·布莱恩":"https://i.postimg.cc/T1fJR6ZB/yue-xiu-ya-zui-zhong.png"
         };
 const charPortraits = _charPortraits;
         var _charPortraitsFallback={
@@ -7031,10 +7033,10 @@ const charPortraits = _charPortraits;
   "莉迪亚": "https://i.postimg.cc/3wrhD42W/li-di-ya.png",
   "艾米莉": "https://i.postimg.cc/fTXM4hwT/ai-mi-li.png",
   "巴蒂斯特": "https://i.postimg.cc/JzLMMdnx/ba-di-si-te.png",
-  "朱尔斯": "https://i.postimg.cc/HnM1CQ1y/zhu-er-si.png",
-  "约修亚": "https://i.postimg.cc/T1fJR6ZB/yue-xiu-ya-zui-zhong.png"
+  "朱尔斯": "https://i.postimg.cc/HnM1CQ1y/zhu-er-si.png"
 };
 
+        var _lockedPortraits = { "林青": 1, "约修亚·布莱恩": 1 };
         var _charPortraitsDefaults = Object.assign({}, _charPortraits); // 原始默认快照
         var _customSet = {}; // 记录哪些角色有自定义立绘（key=name, value=1）
 
@@ -7121,6 +7123,10 @@ const charPortraits = _charPortraits;
 
         // ── 打开自定义立绘弹窗 ──
         window.openCustomPortraitDialog = function(charName) {
+            if (_lockedPortraits[charName]) {
+                alert('「' + charName + '」的立绘已锁定，不支持自定义。');
+                return;
+            }
             var existing = document.getElementById('portrait-custom-modal');
             if (existing) existing.remove();
             var currentUrl = charPortraits[charName] || '';
@@ -7573,18 +7579,21 @@ const charPortraits = _charPortraits;
         function renderPortrait(name) {
             var hasUrl = !!charPortraits[name];
             var isCustom = !!_customSet[name];
+            var locked = !!_lockedPortraits[name];
             var safeName = name.replace(/"/g, '&quot;').replace(/'/g, "\\'");
             if (hasUrl) {
                 var delBtn = isCustom ? `<div class="portrait-del-btn" onclick="event.stopPropagation();window._deleteCustomPortrait('${safeName}');" title="删除自定义立绘">🗑 删除</div>` : '';
+                var customBtn = locked ? '' : `<div class="portrait-custom-btn" onclick="event.stopPropagation();window.openCustomPortraitDialog('${safeName}');" title="上传自定义立绘">🎨 自定义</div>`;
                 return `<div class="portrait-wrapper">
                     <div style="display:flex;gap:6px;align-items:center;">
                         <div class="portrait-toggle-btn" style="flex:1;" onclick="var p=this.parentElement.nextElementSibling;var i=p.querySelector('img');if(!i.src){i.src=i.dataset.src};p.classList.toggle('show');this.innerHTML=p.classList.contains('show')?'收起立绘 ▲':'查看立绘 ▼';">查看立绘 ▼</div>
-                        <div class="portrait-custom-btn" onclick="event.stopPropagation();window.openCustomPortraitDialog('${safeName}');" title="上传自定义立绘">🎨 自定义</div>
+                        ${customBtn}
                         ${delBtn}
                     </div>
                     <div class="large-portrait"><img data-src="${charPortraits[name]}" alt="${safeName}" onerror="var fb=this.dataset.fallback;if(fb&&this.src!==fb){this.src=fb;}" data-fallback="${_charPortraitsFallback[name]||''}" onclick="var mo=document.getElementById('portrait-modal-overlay');document.getElementById('portrait-modal-img').src=this.src;mo.style.display='flex';"></div>
                     </div>`;
             }
+            if (locked) return '';
             return `<div class="portrait-wrapper">
                 <div class="portrait-custom-btn" style="width:100%;padding:5px 0;font-size:0.72em;opacity:0.55;" onclick="event.stopPropagation();window.openCustomPortraitDialog('${safeName}');">🎨 自定义立绘</div>
                 </div>`;
